@@ -52,7 +52,7 @@
         input{
             border-radius: 5px 5px;
             width:80%;
-            height: 60%;
+            height: 40%;
             margin:0px auto;
             border-top:none;
             border-left: none;
@@ -60,14 +60,15 @@
             border-bottom: 1px solid black;
             align-self: center;
         }
-        input:hover{
+        input:hover,input:focus, input:active{
             border-radius: 5px 5px;
             width:80%;
-            height: 60%;
+            height: 40%;
             margin: 0px auto;
             border-top:none;
             border-left: none;
             border-right:none;
+            outline:none;
             border-bottom: 2px solid rgb(37, 5, 110);
         }
         button{
@@ -96,7 +97,7 @@
         {{greeting}}
         <login-form/>
     </div>
-    <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://unpkg.com/vue"></script>
     <script>
         let App = Vue.createApp({
             data:function(){
@@ -108,10 +109,15 @@
 
         App.component('login-form', {
             template:`
-                <form class="form" @submit.prevent="handleSubmit">
+                <form class="form" @submit.prevent="handleSubmit()">
                     <h1>{{title}}</h1>
-                        <custom-input type="email" v-model="email" :label="elabel" placeholder="elabel"/>
-                        <custom-input type="password" v-model="pwd" :label="plabel"/>  
+                        <custom-input 
+                            v-for="(input,i) in inputs"
+                            :key="i"
+                            :label="input.label" 
+                            v-model="input.value"
+                            :type="input.type"  
+                        />
                         <button>submit</button>
                         <div class="sign-in">
                             <div class="line"></div>
@@ -124,15 +130,23 @@
             data(){
                 return{
                     title: "Login Form",
-                    email: '',
-                    pwd: '',
-                    elabel: 'email',
-                    plabel: 'password'
+                    inputs: [
+                        {
+                            label :'email',
+                            value :'',
+                            type: 'email'
+                        },
+                        {
+                            label :'password',
+                            value :'',
+                            type: 'password'
+                        }
+                    ]
                 }
             },
             methods: {
                 handleSubmit(){
-                    console.log(this.email, this.pwd)
+                    console.log(this.inputs[0].value, this.inputs[1].value)
                 }
             },
         })
@@ -140,10 +154,20 @@
             template:`
                 <label>
                     {{label}}
-                    <input type="text" />    
+                    <input :type='type' v-model="inputValue"/>    
                 </label>
             `,
-            props:['label']
+            props:['label','type','modelValue'],
+            computed: {
+                inputValue : {
+                    get(){
+                        return this.modelValue
+                    },
+                    set(value){
+                        this.$emit('update:modelValue', value)
+                    }
+                }
+            }
         })
         App.mount("#app")
     </script>
